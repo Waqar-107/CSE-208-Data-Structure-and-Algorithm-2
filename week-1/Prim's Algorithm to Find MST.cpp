@@ -531,7 +531,7 @@ public:
 //----------------------------------------------------------------------------------Graph class ends here
 
 
-int main(void)
+int main()
 {
 
     //freopen("in.txt","r",stdin);
