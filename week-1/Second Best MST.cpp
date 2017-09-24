@@ -501,6 +501,11 @@ public:
             vis[u.data]=1;
         }
 
+        //path length of mst
+        int sum=0;
+        for(i=1;i<=nVertices;i++)
+            sum+=dist[i];
+
         //output of MST
         for(i=2;i<=nVertices;i++)
         {
@@ -512,17 +517,18 @@ public:
         //when f=1, it means we are  storing the best MST
         if(f)
         {
+            printf("Minimum Spanning Tree:\n");
             for(i=2;i<=nVertices;i++)
             {
+                printf("%d %d\n",i,parent[i]);
                 minEdges[i-2]=edge2(i,parent[i],dist[i]);
             }
 
+            printf("%d\n",sum);
+            printf("---------------------------------------------------------------\n");
+
             return 0;
         }
-
-        int sum=0;
-        for(i=1;i<=nVertices;i++)
-            sum+=dist[i];
 
         return sum;
     }
@@ -577,10 +583,12 @@ public:
 
         else
         {
+            printf("Second Best MST\n");
             for(i=2;i<=nVertices;i++)
                 printf("%d %d\n",i,tempParent[i]);
 
-            printf("%d",m);
+            printf("%d\n",m);
+            printf("---------------------------------------------------------------\n");
         }
 
         delete[] tempParent;
@@ -635,7 +643,7 @@ public:
 int main()
 {
 
-    //freopen("in.txt","r",stdin);
+    freopen("in.txt","r",stdin);
 
     int i,j,k;
     int n,m;
