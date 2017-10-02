@@ -514,16 +514,10 @@ public:
             adjList=0;
         }
 
-        if(parent)
+        if(vis)
         {
-            delete[] parent;
-            parent=0;
-        }
-
-        if(dist)
-        {
-            delete[] dist;
-            dist=0;
+            delete[] vis;
+            vis=0;
         }
     }
 };
@@ -534,7 +528,7 @@ public:
 int main()
 {
 
-    //freopen("in.txt","r",stdin);
+    freopen("in.txt","r",stdin);
 
     int i,j,k;
     int n,m;
