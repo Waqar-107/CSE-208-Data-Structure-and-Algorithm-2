@@ -623,16 +623,10 @@ public:
 			minEdges = 0;
 		}
 
-		if (parent)
+		if (vis)
 		{
-			delete[] parent;
-			parent = 0;
-		}
-
-		if (dist)
-		{
-			delete[] dist;
-			dist = 0;
+			delete[] vis;
+			vis = 0;
 		}
 	}
 };
