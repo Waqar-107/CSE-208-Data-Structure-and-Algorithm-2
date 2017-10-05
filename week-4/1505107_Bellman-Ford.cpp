@@ -1,5 +1,5 @@
 /**************Bellman-Ford Algorithm***************/
-/**************       1505107        ***************/
+/**************             1505107              ***************/
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -230,11 +230,12 @@ public:
     //--------------------------------------------------print
     void print()
     {
-        for(int i=1;i<=nVertices;i++)
-            printf("%d %d %d\n",i,dist[i],parent[i]);
-
         if(sol)
+        {
             printf("No negative edge cycle\n");
+            for(int i=1;i<=nVertices;i++)
+                printf("%d %d %d\n",i,dist[i],parent[i]);
+        }
         else
             printf("Negative edge cycle found\n");
     }
