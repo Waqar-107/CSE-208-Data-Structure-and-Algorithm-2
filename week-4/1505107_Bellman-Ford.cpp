@@ -3,12 +3,15 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<iostream>
 
 #define NULL_VALUE -999999
 #define INFINITY 999999
 
 #define dbg printf("in\n");
 #define nl printf("\n");
+
+using namespace std;
 
 //----------------------------------------------------------------------------------edge
 struct edge
@@ -126,17 +129,18 @@ public:
 //----------------------------------------------------------------------------------Graph class starts here
 class Graph
 {
-    bool sol;
+    bool sol,dir;
     int nVertices, nEdges ;
     int *parent,*dist;
     ArrayList  adjList ;
 
 public:
     //--------------------------------------------------Constructing
-    Graph()
+    Graph(bool f)
     {
         nVertices = 0 ; nEdges = 0 ;
         parent=0;dist=0;
+        dir=f;
     }
     //--------------------------------------------------Constructing
 
@@ -174,7 +178,10 @@ public:
 
         this->nEdges++ ;
 
-        adjList.insertItem(edge(u,v,w)) ;
+        adjList.insertItem(edge(u,v,w));
+
+        if(!dir)
+            adjList.insertItem(edge(v,u,w));
     }
     //--------------------------------------------------Add Edge
 
@@ -186,6 +193,9 @@ public:
             return;
 
         adjList.removeItem(edge(u,v,w));
+
+        if(!dir)
+            adjList.insertItem(edge(v,u,w));
     }
     //--------------------------------------------------Remove Edge
 
@@ -271,13 +281,13 @@ public:
 int main()
 {
 
-    freopen("in.txt","r",stdin);
+    //freopen("in.txt","r",stdin);
 
     int i,j,k;
     int n,m;
     int u,v,w;
 
-    Graph g;
+    Graph g(1);
 
     scanf("%d%d",&n,&m);
     g.setnVertices(n);
