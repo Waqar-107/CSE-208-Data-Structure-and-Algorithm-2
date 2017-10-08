@@ -216,7 +216,7 @@ public:
             for(j=0;j<adjList.getLength();j++)
             {
                 u=adjList.getItem(j).u;v=adjList.getItem(j).v;w=adjList.getItem(j).w;
-                if(dist[v]>dist[u]+w)
+                if(dist[u]!=INFINITY && dist[v]>dist[u]+w)
                 {
                     dist[v]=dist[u]+w;
                     parent[v]=u;
