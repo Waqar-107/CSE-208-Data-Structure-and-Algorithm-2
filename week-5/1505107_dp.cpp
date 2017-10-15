@@ -14,34 +14,34 @@ using namespace std;
 
 int main()
 {
-	//freopen("in.txt","r",stdin);
+    //freopen("in.txt","r",stdin);
 
-	int i, j, k;
-	int n, x,v;
+    int i, j, k;
+    int n, x,v;
 
-	scanf("%d%d", &v, &n);
+    scanf("%d%d", &v, &n);
 
-	int coins[n];
-	int q[n];
+    int coins[n];
+    int q[n];
 
-	for(i=0;i<n;i++)
+    for(i=0; i<n; i++)
         scanf("%d",&coins[i]);
 
-    for(i=0;i<n;i++)
+    for(i=0; i<n; i++)
         scanf("%d",&q[i]);
 
     int tab[v+1];
     int used[n][v+1];
 
     tab[0]=0;
-    for(i=1;i<=v;i++)
+    for(i=1; i<=v; i++)
         tab[i]=inf;
 
     memset(used,0,sizeof(used));
 
-    for(i=1;i<=v;i++)
+    for(i=1; i<=v; i++)
     {
-        for(j=0;j<n;j++)
+        for(j=0; j<n; j++)
         {
             x=tab[i-coins[j]];
             if(i>=coins[j])
@@ -50,7 +50,7 @@ int main()
                 {
                     tab[i]=x+1;
 
-                    for(k=0;k<n;k++)
+                    for(k=0; k<n; k++)
                         used[k][i]=used[k][i-coins[j]];
 
                     used[j][i]=used[j][i-coins[j]]+1;
@@ -60,11 +60,20 @@ int main()
     }
 
     if(tab[v]!=inf)
+    {
         printf("%d\n",tab[v]);
+
+        printf("notes used:\n");
+        for(i=0; i<n; i++)
+        {
+            if(used[i][v]!=0)
+                printf("%d * %d\n",coins[i],used[i][v]);
+        }
+    }
 
     else
         printf("Impossible\n");
 
 
-	return 0;
+    return 0;
 }
