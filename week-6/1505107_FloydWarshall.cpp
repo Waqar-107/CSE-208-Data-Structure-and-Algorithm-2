@@ -1,6 +1,5 @@
-#define _CRT_SECURE_NO_WARNINGS
-
-/***from dust i have come, dust i will be***/
+/***Floyd-Warshalls Algorithm***/
+/***        1505107         ***/
 
 #include<iostream>
 #include<cstdio>
