@@ -43,7 +43,7 @@ int main()
 	{
 		scanf("%d%d%d", &u, &v, &w);
 
-		dist[u][v] = w;
+		dist[u][v] = min(w,dist[u][v]);
 		parent[u][v] = u;
 	}
 
