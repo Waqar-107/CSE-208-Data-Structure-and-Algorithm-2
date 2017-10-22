@@ -1,8 +1,11 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 /***Floyd-Warshalls Algorithm***/
 /***        1505107         ***/
 
 #include<iostream>
 #include<cstdio>
+#include<algorithm>
 
 typedef long long int ll;
 
@@ -14,7 +17,7 @@ using namespace std;
 
 int main()
 {
-	freopen("in2.txt", "r", stdin);
+	//freopen("in2.txt", "r", stdin);
 
 	int i, j, k;
 	int n, m;
@@ -33,7 +36,7 @@ int main()
 	for (i = 0; i <= n; i++)
 	{
 		for (j = 0; j <= n; j++)
-			dist[i][j] = inf,parent[i][j]=inf;
+			dist[i][j] = inf, parent[i][j] = inf;
 	}
 
 	for (i = 0; i <= n; i++)
@@ -43,9 +46,26 @@ int main()
 	{
 		scanf("%d%d%d", &u, &v, &w);
 
-		dist[u][v] = min(w,dist[u][v]);
+		dist[u][v] = min(w, dist[u][v]);
 		parent[u][v] = u;
 	}
+
+	printf("--------------------------------------------------------------------\n");
+	printf("Initial Matrix\n");
+	for (i = 1; i <= n; i++)
+	{
+		for (j = 1; j <= n; j++)
+		{
+			if (dist[i][j] >= inf)
+				printf("inf  ");
+
+			else
+				printf("%d  ", dist[i][j]);
+		}
+
+		printf("\n");
+	}
+	printf("--------------------------------------------------------------------\n");
 
 	for (k = 1; k <= n; k++)
 	{
