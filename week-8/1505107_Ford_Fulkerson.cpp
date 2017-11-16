@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 /***from dust i have come, dust i will be***/
 
 #include<algorithm>
@@ -33,7 +31,7 @@ using namespace std;
 class graph
 {
 	int n;
-	int **res, *parent, **capacity;
+	int **res, **capacity, *parent;
 	bool *vis;
 
 public:
@@ -67,15 +65,11 @@ public:
 		vis = new bool[n + 1];
 	}
 
-
-	//add the capacities
 	void addEdge(int u, int v, int w)
 	{
 		capacity[u][v] = w;
 	}
 
-
-	//find path from source to sink
 	bool bfs(int s, int t)
 	{
 		for (int i = 0; i <= n; i++)
@@ -103,11 +97,9 @@ public:
 			}
 		}
 
-		return vis[t];
+		return vis[t]==1;
 	}
 
-
-	//ford-fulkerson method
 	int fordFulkerson(int s, int t)
 	{
 		//initially residual capacity is equal to the actual capacity
@@ -128,21 +120,26 @@ public:
 
 			//determine the minimum residual capacity in the path
 			v = t;
-			while (parent[v] != -1)
+			while (1)
 			{
 				u = parent[v];
 				minFlow = min(minFlow, res[u][v]);
 				v = u;
+				if (v == s)
+					break;
 			}
 
 			//update residual capacity
 			v = t;
-			while (parent[v] != -1)
+			while (1)
 			{
 				u = parent[v];
 				res[u][v] -= minFlow;
 				res[v][u] += minFlow;
 				v = u;
+
+				if (v == s)
+					break;
 			}
 
 			//update flow
@@ -158,13 +155,14 @@ int main()
 	//freopen("in2.txt", "r", stdin);
 
 	int i, j, k;
-	int n, m, x;
-	int u, v, w;
+	int n, m;
 	int s, t;
+	int u, v, w;
 
 	scanf("%d%d", &n, &m);
 
 	graph g(n);
+
 	for (i = 0; i < m; i++)
 	{
 		scanf("%d%d%d", &u, &v, &w);
@@ -173,8 +171,7 @@ int main()
 
 	scanf("%d%d", &s, &t);
 
-	cout << g.fordFulkerson(s, t) << endl;
-
+	cout << g.fordFulkerson(s,t) << endl;
 
 	return 0;
 }
