@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 /***from dust i have come, dust i will be***/
 
 #include<algorithm>
@@ -97,7 +99,7 @@ public:
 			}
 		}
 
-		return vis[t]==1;
+		return vis[t] == 1;
 	}
 
 	int fordFulkerson(int s, int t)
@@ -148,11 +150,57 @@ public:
 
 		return flow;
 	}
+
+	void flowThroughEdge()
+	{
+		printf("----------------------------------------------------------------\n");
+		printf("flow through all edges-\n");
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				if (capacity[i][j] > 0)
+				{
+					printf("flow through %d and %d: %d\n", i, j, capacity[i][j] - res[i][j]);
+				}
+			}
+		}
+	}
+
+	void dfs(int s)
+	{
+		vis[s] = 1;
+		for (int i = 1; i <= n; i++)
+		{
+			if (res[s][i] && !vis[i])
+				dfs(i);
+		}
+	}
+
+	void minCut(int s)
+	{
+		for (int i = 0; i <= n; i++)
+			vis[i] = 0;
+
+		dfs(s);
+
+		// Print all edges that are from a reachable node to  non-reachable node in the original graph
+		printf("----------------------------------------------------------------\n");
+		printf("min cut edges-\n");
+		for (int i = 1; i <= n; i++)
+		{
+			for (int j = 1; j <= n; j++)
+			{
+				if (vis[i] && !vis[j] && capacity[i][j])
+					printf("%d - %d\n", i, j);
+			}
+		}
+	}
 };
 
 int main()
 {
-	//freopen("in2.txt", "r", stdin);
+	freopen("in2.txt", "r", stdin);
 
 	int i, j, k;
 	int n, m;
@@ -171,7 +219,9 @@ int main()
 
 	scanf("%d%d", &s, &t);
 
-	cout << g.fordFulkerson(s,t) << endl;
+	cout << g.fordFulkerson(s, t) << endl;
+	g.flowThroughEdge();
+	g.minCut(s);
 
 	return 0;
 }
