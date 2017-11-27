@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-/***from dust i have come, dust i will be***/
+//Ford-Fulkerson Method, Edmond-Carp Algorithm
+//1505107
 
 #include<algorithm>
 #include<cmath>
@@ -161,7 +162,7 @@ public:
 			{
 				if (capacity[i][j] > 0)
 				{
-					printf("flow through %d and %d: %d\n", i, j, capacity[i][j] - res[i][j]);
+					printf("flow through %d and %d: %d\n", i, j, res[j][i]);
 				}
 			}
 		}
@@ -200,7 +201,7 @@ public:
 
 int main()
 {
-	freopen("in2.txt", "r", stdin);
+	freopen("in.txt", "r", stdin);
 
 	int i, j, k;
 	int n, m;
