@@ -162,7 +162,7 @@ public:
 			{
 				if (capacity[i][j] > 0)
 				{
-					printf("flow through %d and %d: %d\n", i, j, res[j][i]);
+					printf("flow through %d and %d: %d\n", i, j, abs(capacity[i][j]-res[i][j]));
 				}
 			}
 		}
