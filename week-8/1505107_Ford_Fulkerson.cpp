@@ -102,7 +102,7 @@ public:
 			}
 		}
 
-		return vis[t] == 1;
+		return vis[t];
 	}
 
 	int fordFulkerson(int s, int t)
