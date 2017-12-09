@@ -34,21 +34,21 @@ using namespace std;
 ull djb2(string s)
 {
 	ull h = 5381;
-	ll l = s.length();
+	int l = s.length();
 
-	for (ll i = 0; i < l; i++)
+	for (int i = 0; i < l; i++)
 		h += ((h * 33) + s[i]);
-
+	
 	return h;
 }
 
 ull adler32(string s)
 {
 	ull a = 1, b = 0;
-	ll l, mod = 65521;
+	int l, mod = 65521;
 
 	l = s.length();
-	for (ll i = 0; i < l; i++)
+	for (int i = 0; i < l; i++)
 	{
 		a = (a + s[i]) % mod;
 		b = (b + a) % mod;
@@ -62,7 +62,7 @@ ull fnv(string s)
 	ull fnv_prime = 16777619;
 	ull fnv_offset = 2166136261;
 
-	ll l = s.length();
+	int l = s.length();
 	ull h = 0;
 
 	for (ll i = 0; i < l; i++)
@@ -77,7 +77,7 @@ ull fnv(string s)
 void generate(string *dict,int n,int l)
 {
 	//n words of l size
-	//charachters from 65-90
+	//characters from 65-90
 
 	int randNum;
 
@@ -98,29 +98,38 @@ struct node
 {
 	string key;
 	int value;
-	node *forward, *backward;
+	node *next, *prev;
 
-	node() {}
+	node() {
+		next = 0;
+		prev = 0;
+	}
+
 	node(string key, int value)
 	{
 		this->key = key;
 		this->value = value;
 
-		forward = 0;
-		backward = 0;
+		next = 0;
+		prev = 0;
 	}
 };
 
 class chaining
 {
 	int m, type, c, v;
-	struct node *hashTable;
+	node **hashTable;
+	node *head;
 public:
 	chaining(int m,int type)
 	{
 		this->m = m;
 		this->type = type;
-		hashTable = new node[m];
+		head = 0;
+		hashTable = new node*[m];
+
+		for (int i = 0; i < m; i++)
+			hashTable[i] = 0;
 
 		c = 0; v = 1;
 	}
@@ -130,13 +139,36 @@ public:
 		int i;
 		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
 
-		//start searching at i
+		if (hashTable[i] == 0)
+		{
+			struct node *newNode = new node(s, v); v++;
+			hashTable[i] = newNode;
+		}
 
+		else
+		{
+			c++;
+			struct node *newNode = new node(s, v); v++;
+			head = hashTable[i];
+			hashTable[i] = newNode;
+			newNode->next = head;
+			head->prev = newNode;
+		}
+		
 	}
 
 	void remove(string s)
 	{
+		int i;
+		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
 
+		struct node *temp = search(s);
+
+		if (temp)
+		{
+			//if in head
+			//hashTable[i]
+		}
 	}
 
 	node* search(string s)
@@ -144,7 +176,18 @@ public:
 		int i;
 		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
 
-		//start searching at i
+		if (hashTable[i] == 0)
+			return NULL;
+
+		head = hashTable[i];
+		while (head)
+		{
+			if (head->key == s)
+				return head;
+
+			head = head->next;
+		}
+
 		return NULL;
 	}
 
@@ -191,7 +234,7 @@ public:
 
 			else if (hashTable[i].first == s)
 			{
-				//printf("duplicate value\n");
+				//printf("duplicate value\n"); 
 				return;
 			}
 		}
@@ -202,6 +245,12 @@ public:
 			{
 				hashTable[j] = { s,v };
 				v++;
+				return;
+			}
+
+			else if (hashTable[i].first == s)
+			{
+				//printf("duplicate value\n"); 
 				return;
 			}
 		}
@@ -229,7 +278,7 @@ public:
 				return j;
 		}
 
-		for (int j = 0; j < m; j++)
+		for (int j = 0; j < i; j++)
 		{
 			if (hashTable[j].first == s)
 				return j;
@@ -323,7 +372,7 @@ int main()
 
 			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-			printf("inserted %d words in %f seconds\n", n, time_spent);
+			printf("inserted %d words in %f seconds, %d collisions occured, \n", n, time_spent,x.getCollision());
 			//--------------------------------------------------------------------------insert
 
 			//generate random words to search them in the hash-table
@@ -345,7 +394,7 @@ int main()
 			end = clock();
 			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-			printf("%d collisions occured, searched in %f seconds\n", x.getCollision(), time_spent);
+			printf("searched in %f seconds\n",time_spent);
 			printf("%d words found, %d not found\n", sc, usc);
 			//--------------------------------------------------------------------------search
 
