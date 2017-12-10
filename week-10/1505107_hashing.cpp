@@ -42,32 +42,6 @@ ull djb2(string s)
 	return h;
 }
 
-ull adler32(string s)
-{
-	ull a = 1, b = 0;
-	int l, mod = 65521;
-
-	l = s.length();
-	for (int i = 0; i < l; i++)
-	{
-		a = (a + s[i]) % mod;
-		b = (b + a) % mod;
-	}
-
-	return b*65536 + a;
-}
-
-ull sdbm(string s)
-{
-	ull h = 0, l = s.length();
-	for (ll i = 0; i < l; i++)
-	{
-		h = s[i] + (h << 6) + (h << 16) - h;
-	}
-
-	return h;
-}
-
 ull fnv(string s)
 {
 	ull fnv_prime = 16777619;
@@ -87,7 +61,7 @@ ull fnv(string s)
 
 ull jenkins(string s)
 {
-	ull h = 0, l=s.length();
+	ull h = 0, l = s.length();
 	for (ll i = 0; i < l; i++)
 	{
 		h += s[i];
@@ -102,20 +76,19 @@ ull jenkins(string s)
 	return h;
 }
 
-void generate(string *dict,int n,int l)
+void generate(string *dict, int n, int l)
 {
 	//n words of l size
-	//characters from 65-90
-
+	string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	int randNum;
 
-	for(int i=0;i<n;i++)
+	for (int i = 0; i < n; i++)
 	{
-		string str = "";
+		string str;
 		for (int j = 0; j < l; j++)
 		{
-			randNum = rand() % (90 - 65 + 1) + 65;
-			str.push_back((char)randNum);
+			randNum = rand() % 52;
+			str += letters[randNum];
 		}
 
 		dict[i] = str;
@@ -149,7 +122,7 @@ class chaining
 	node **hashTable;
 	node *head;
 public:
-	chaining(int m,int type)
+	chaining(int m, int type)
 	{
 		this->m = m;
 		this->type = type;
@@ -157,57 +130,84 @@ public:
 		hashTable = new node*[m];
 
 		for (int i = 0; i < m; i++)
-			hashTable[i] = 0;
+			hashTable[i] = NULL;
 
 		c = 0; v = 1;
 	}
 
 	void insert(string s)
 	{
-		int i;
-		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
+		if (search(s) != NULL)
+			return;
 
-		if (hashTable[i] == 0)
-		{
-			struct node *newNode = new node(s, v); v++;
-			hashTable[i] = newNode;
-		}
+		ull h;
+		type == 1 ? h = djb2(s) % m : type == 2 ? h = jenkins(s) % m : h = fnv(s) % m;
+
+		struct node *newNode = new node(s, v); v++;
+		head = hashTable[h];
+
+		//1st element
+		if (head == NULL)
+			hashTable[h] = newNode;
 
 		else
 		{
-			c++;
-			struct node *newNode = new node(s, v); v++;
-			head = hashTable[i];
-			hashTable[i] = newNode;
-			newNode->next = head;
 			head->prev = newNode;
+			newNode->next = head;
+			hashTable[h] = newNode;
 		}
-
 	}
 
 	void remove(string s)
 	{
-		int i;
-		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
+		if (search(s) == NULL)
+		{
+			cout << "key not found" << endl;
+			return;
+		}
+
+		ull h;
+		type == 1 ? h = djb2(s) % m : type == 2 ? h = jenkins(s) % m : h = fnv(s) % m;
 
 		struct node *temp = search(s);
+		struct node *pre, *nxt;
 
-		if (temp)
+		//the item is in head
+		if (hashTable[h] == temp)
 		{
-			//if in head
-			//hashTable[i]
+			nxt = temp->next;
+			hashTable[h] = nxt;
+
+			if (nxt)
+				nxt->prev = 0;
+
+			delete temp;
+		}
+
+		else
+		{
+			pre = temp->prev;
+			nxt = temp->next;
+
+			pre->next = nxt;
+
+			if(nxt)
+				nxt->prev = pre;
+
+			delete temp;
 		}
 	}
 
 	node* search(string s)
 	{
-		int i;
-		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
+		ull h;
+		type == 1 ? h = djb2(s) % m : type == 2 ? h = jenkins(s) % m : h = fnv(s) % m;
 
-		if (hashTable[i] == 0)
+		int idx = h;
+		if (hashTable[idx] == 0)
 			return NULL;
 
-		head = hashTable[i];
+		head = hashTable[idx];
 		while (head)
 		{
 			if (head->key == s)
@@ -219,57 +219,85 @@ public:
 		return NULL;
 	}
 
+	int getCollision()
+	{
+		ll cnt = 0;
+		for (ll i = 0; i < m; i++)
+		{
+			if (hashTable[i] != NULL)
+				cnt++;
+		}
+
+		return (m - cnt);
+	}
+
 	void memFree()
 	{
+		for (ll i = 0; i < m; i++)
+		{
+			node *temp = hashTable[i];
+			while (temp != NULL)
+			{
+				node *pre = temp;
+				temp = temp->next;
+				delete pre;
+			}
+		}
+
 		delete[] hashTable;
+	}
+};
+
+struct node2
+{
+	string key;
+	int value;
+
+	node2() { key = "null"; value = 0; }
+	node2(string key, int value)
+	{
+		this->key = key;
+		this->value = value;
 	}
 };
 
 class linearProbing
 {
-	int m, c, type, v;
-	pp *hashTable;
+	int m, c;
+	int type, v;
+	node2 *hashTable;
 public:
-	linearProbing(int m,int type)
+	linearProbing(int m, int type)
 	{
 		c = 0, v = 1;
 		this->m = m;
 		this->type = type;
-		hashTable = new pp[m];
-
-		for (int i = 0; i < m; i++)
-			hashTable[i] = { "null",NULL };
+		hashTable = new node2[m];
 	}
 
 	void insert(string s)
 	{
+		//avoid duplicate
+		if (search(s))
+			return;
+
 		ull h;
 		int i = 0;
-		type == 1 ? h = djb2(s)  : type == 2 ? h = jenkins(s)  : h = fnv(s) ;
-
-		//avoid duplicate
-		if (search(s) != -1)
-		{
-			//duplicate
-			//cout << "duplicate" << endl;
-			return;
-		}
+		type == 1 ? h = djb2(s) : type == 2 ? h = jenkins(s) : h = fnv(s);
 
 		//update collision
-		ull jdx = (i + h) % m;
-		int idx = jdx;
+		ull idx = (i + h) % m;
 
-		if (hashTable[idx].second != NULL)
+		if (hashTable[idx].value>0)
 			c++;
 
 		while (i < m)
 		{
-			jdx = (i + h) % m;
-			idx = jdx;
+			idx = (i + h) % m;
 
-			if (hashTable[idx].second == NULL)
+			if (hashTable[idx].value==0 || hashTable[idx].value==-1)
 			{
-				hashTable[idx] = { s,v }; v++;
+				hashTable[idx] = node2(s, v); v++;
 				return;
 			}
 
@@ -280,40 +308,48 @@ public:
 	void remove(string s)
 	{
 		int i = search(s);
-		if (i != -1)
-			hashTable[i] = { "deleted",NULL };
+		if (i)
+		{
+			hashTable[i].key = "deleted"; hashTable[i].value = -1;
+		}
 
 		else
-			printf("key not found");
+			printf("key not found\n");
 	}
 
 	int search(string s)
 	{
-		ull jdx, h;
-		int i=0, idx;
-		type == 1 ? h = djb2(s)  : type == 2 ? h = jenkins(s) : h = fnv(s);
+		ull  h;
+		int i = 0;
+		type == 1 ? h = djb2(s) : type == 2 ? h = jenkins(s) : h = fnv(s);
 
 		while (i < m)
 		{
-			jdx = (h + i) % m;
-			idx = jdx;
+			ull idx = (h + i) % m;
 
-			if (hashTable[idx].second == NULL)
-				return -1;
+			//empty cell
+			if (hashTable[idx].key=="null")
+				return 0;
 
-			else if (hashTable[idx].first == s)
+			//key found
+			else if (hashTable[idx].key == s)
 				return idx;
 
 			else
 				i++;
 		}
 
-		return -1;
+		return 0;
 	}
 
 	int getCollision()
 	{
 		return c;
+	}
+
+	int getSize()
+	{
+		return v - 1;
 	}
 
 	void memFree()
@@ -328,103 +364,119 @@ int main()
 	//freopen("in2.txt", "r", stdin);
 
 	int i, j, k;
-	int n, m;
-	int t1, t2;
+	int n, m, t;
 	int sc, usc;
+	clock_t begin, end;
 	double time_spent;
 
 	while (1)
 	{
-		printf("choose method: 1.seperate chaining. 2.linear probing. 3.quit\n");
-		scanf("%d", &t1);
+		printf("choose hash function: 1.djb2. 2.jenkins. 3.fnv\n");
+		scanf("%d", &t);
 
-		if (t1 == 3)return 0;
+		if (t > 3)
+			return 0;
 
-		printf("\nchoose hash function: 1.djb2. 2.jenkins. 3.fnv\n");
-		scanf("%d", &t2);
-
-		printf("\ngive the number of words and size of the words to generate:\n");
+		printf("give the number of words and size of the words to generate:\n");
 		scanf("%d%d", &n, &m);
 
+		//---------------------------------------------------------------------------generate
 		//allocate memory for storing words
 		string *dict = new string[n];
 
 		//generate words that will be inserted
 		generate(dict, n, m);
 
-		if (t1 == 1)
+		//allocate memory for words to be searched
+		string *searchable = new string[n];
+
+		//generate words that will be searched
+		generate(searchable, n, m);
+		//---------------------------------------------------------------------------generate
+
+		//-----------------------------------------------------------------------------------------------chaining
+		chaining x(n, t);
+		printf("---------------------------------------------------------chaining\n");
+
+		//--------------------------------------------------------------------------insert
+		begin = clock();
+
+		for (i = 0; i < n; i++)
+			x.insert(dict[i]);
+
+		end = clock();
+
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("inserted %d words in %f seconds, %d collisions occured, \n", n, time_spent, x.getCollision());
+		//--------------------------------------------------------------------------insert
+
+		//--------------------------------------------------------------------------search
+		sc = 0, usc = 0;
+		begin = clock();
+
+		for (i = 0; i < n; i++)
 		{
-			/*chaining x(n, t2);
-
-			clock_t begin = clock();
-
-			for (i = 0; i < n; i++)
-				x.insert(dict[i]);
-
-			clock_t end = clock();
-
-			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-			printf("inserted %d words in %f seconds\n", n, time_spent);
-
-			//generate random words to search them in the hash-table
-			generate(dict, n, m);
-
-			clock_t begin = clock();
-
-			for (i = 0; i < n; i++)
-				x.search(dict[i]);
-
-			clock_t end = clock();
-
-			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-			printf("%d collisions occured, searched in %f seconds\n");
-			x.memFree();*/
+			node *temp = x.search(searchable[i]);
+			if (temp == 0)
+				usc++;
+			else
+				sc++;
 		}
 
-		else if (t1 == 2)
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("searched in %f seconds\n", time_spent);
+		printf("%d words found, %d not found\n", sc, usc);
+		//--------------------------------------------------------------------------search
+
+		x.memFree();
+		printf("---------------------------------------------------------chaining\n\n");
+		//-----------------------------------------------------------------------------------------------chaining
+
+		//-----------------------------------------------------------------------------------------------linear probing
+		linearProbing y(n, t);
+		printf("---------------------------------------------------------linear probing\n");
+
+		//--------------------------------------------------------------------------insert
+		begin = clock();
+
+		for (i = 0; i < n; i++)
+			y.insert(dict[i]);
+
+		end = clock();
+
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("inserted %d words in %f seconds, %d collisions occured, \n", n, time_spent, y.getCollision());
+		//--------------------------------------------------------------------------insert
+
+		//--------------------------------------------------------------------------search
+		sc = 0, usc = 0;
+		begin = clock();
+
+		for (i = 0; i < n; i++)
 		{
-			linearProbing x(n, t2);
-
-			//--------------------------------------------------------------------------insert
-			clock_t begin = clock();
-
-			for (i = 0; i < n; i++)
-				x.insert(dict[i]);
-
-			clock_t end = clock();
-
-			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-			printf("inserted %d words in %f seconds, %d collisions occured, \n", n, time_spent,x.getCollision());
-			//--------------------------------------------------------------------------insert
-
-			//generate random words to search them in the hash-table
-			generate(dict, n, m);
-
-			//--------------------------------------------------------------------------search
-			sc = 0, usc = 0;
-			begin = clock();
-
-			for (i = 0; i < n; i++)
-			{
-				j=x.search(dict[i]);
-				if (j == -1)
-					usc++;
-				else
-					sc++;
-			}
-
-			end = clock();
-			time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-			printf("searched in %f seconds\n",time_spent);
-			printf("%d words found, %d not found\n", sc, usc);
-			//--------------------------------------------------------------------------search
-
-			x.memFree();
+			j = y.search(searchable[i]);
+			if (!j)
+				usc++;
+			else
+				sc++;
 		}
 
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+		printf("searched in %f seconds\n", time_spent);
+		printf("%d words found, %d not found\n", sc, usc);
+		//--------------------------------------------------------------------------search
+
+		y.memFree();
+		printf("---------------------------------------------------------linear probing\n\n");
+		//-----------------------------------------------------------------------------------------------linear probing
+
+		delete[] searchable;
 		delete[] dict;
 	}
 
