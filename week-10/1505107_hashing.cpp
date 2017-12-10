@@ -38,7 +38,7 @@ ull djb2(string s)
 
 	for (int i = 0; i < l; i++)
 		h += ((h * 33) + s[i]);
-	
+
 	return h;
 }
 
@@ -57,6 +57,17 @@ ull adler32(string s)
 	return b*65536 + a;
 }
 
+ull sdbm(string s)
+{
+	ull h = 0, l = s.length();
+	for (ll i = 0; i < l; i++)
+	{
+		h = s[i] + (h << 6) + (h << 16) - h;
+	}
+
+	return h;
+}
+
 ull fnv(string s)
 {
 	ull fnv_prime = 16777619;
@@ -70,6 +81,23 @@ ull fnv(string s)
 		h *= fnv_prime;
 		h ^= s[i];
 	}
+
+	return h;
+}
+
+ull jenkins(string s)
+{
+	ull h = 0, l=s.length();
+	for (ll i = 0; i < l; i++)
+	{
+		h += s[i];
+		h += (h << 10);
+		h ^= (h >> 6);
+	}
+
+	h += (h << 3);
+	h ^= (h >> 11);
+	h += (h << 15);
 
 	return h;
 }
@@ -154,7 +182,7 @@ public:
 			newNode->next = head;
 			head->prev = newNode;
 		}
-		
+
 	}
 
 	void remove(string s)
@@ -215,44 +243,37 @@ public:
 
 	void insert(string s)
 	{
-		int i;
-		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
+		ull h;
+		int i = 0;
+		type == 1 ? h = djb2(s)  : type == 2 ? h = jenkins(s)  : h = fnv(s) ;
 
-		//update collision
-		if (hashTable[i].second != NULL)
-			c++;
-
-		//start searching at i
-		for (int j = i; j < m; j++)
+		//avoid duplicate
+		if (search(s) != -1)
 		{
-			if (hashTable[j].second == NULL)
-			{
-				hashTable[j] = { s,v };
-				v++;
-				return;
-			}
-
-			else if (hashTable[i].first == s)
-			{
-				//printf("duplicate value\n"); 
-				return;
-			}
+			//duplicate
+			//cout << "duplicate" << endl;
+			return;
 		}
 
-		for (int j = 0; j < i; j++)
+		//update collision
+		ull jdx = (i + h) % m;
+		int idx = jdx;
+
+		if (hashTable[idx].second != NULL)
+			c++;
+
+		while (i < m)
 		{
-			if (hashTable[j].second == NULL)
+			jdx = (i + h) % m;
+			idx = jdx;
+
+			if (hashTable[idx].second == NULL)
 			{
-				hashTable[j] = { s,v };
-				v++;
+				hashTable[idx] = { s,v }; v++;
 				return;
 			}
 
-			else if (hashTable[i].first == s)
-			{
-				//printf("duplicate value\n"); 
-				return;
-			}
+			i++;
 		}
 	}
 
@@ -268,20 +289,23 @@ public:
 
 	int search(string s)
 	{
-		int i;
-		type == 1 ? i = djb2(s) % m : type == 2 ? i = adler32(s) % m : i = fnv(s) % m;
+		ull jdx, h;
+		int i=0, idx;
+		type == 1 ? h = djb2(s)  : type == 2 ? h = jenkins(s) : h = fnv(s);
 
-		//start searching at i
-		for (int j = i; j < m; j++)
+		while (i < m)
 		{
-			if (hashTable[j].first == s)
-				return j;
-		}
+			jdx = (h + i) % m;
+			idx = jdx;
 
-		for (int j = 0; j < i; j++)
-		{
-			if (hashTable[j].first == s)
-				return j;
+			if (hashTable[idx].second == NULL)
+				return -1;
+
+			else if (hashTable[idx].first == s)
+				return idx;
+
+			else
+				i++;
 		}
 
 		return -1;
@@ -316,7 +340,7 @@ int main()
 
 		if (t1 == 3)return 0;
 
-		printf("\nchoose hash function: 1.djb2. 2.adler32. 3.fnv\n");
+		printf("\nchoose hash function: 1.djb2. 2.jenkins. 3.fnv\n");
 		scanf("%d", &t2);
 
 		printf("\ngive the number of words and size of the words to generate:\n");
