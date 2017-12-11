@@ -76,13 +76,13 @@ ull jenkins(string s)
 	return h;
 }
 
-void generate(string *dict, int n, int l)
+void generate(string *dict, int n, int l, int seed)
 {
 	//n words of l size
 	string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	int randNum;
-	srand(time(0));
 
+	srand(seed);
 	for (int i = 0; i < n; i++)
 	{
 		string str;
@@ -401,9 +401,13 @@ int main()
 
 	int i, j, k;
 	int n, m, t;
-	int sc, usc;
+	int sc, usc, seed=1;
 	clock_t begin, end;
 	double time_spent;
+
+	/*string *tt1 = new string[10]; generate(tt1, 10, 4); string *tt2 = new string[10]; generate(tt2, 10, 4);
+	for (i = 0; i < 10; i++)
+		cout << tt1[i] << " " << tt2[i] << endl;*/
 
 	while (1)
 	{
@@ -421,13 +425,14 @@ int main()
 		string *dict = new string[n];
 
 		//generate words that will be inserted
-		generate(dict, n, m);
+		generate(dict, n, m, seed);
 
 		//allocate memory for words to be searched
 		string *searchable = new string[n];
 
 		//generate words that will be searched
-		generate(searchable, n, m);
+		generate(searchable, n, m, seed+1);
+		seed += 2;
 		//---------------------------------------------------------------------------generate
 
 		//-----------------------------------------------------------------------------------------------chaining
