@@ -81,6 +81,7 @@ void generate(string *dict, int n, int l)
 	//n words of l size
 	string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	int randNum;
+	srand(time(0));
 
 	for (int i = 0; i < n; i++)
 	{
@@ -91,6 +92,7 @@ void generate(string *dict, int n, int l)
 			str += letters[randNum];
 		}
 
+		//srand(time(NULL));
 		dict[i] = str;
 	}
 }
@@ -118,7 +120,8 @@ struct node
 
 class chaining
 {
-	int m, type, c, v;
+	int m, type;
+	int c, v, sz;
 	node **hashTable;
 	node *head;
 public:
@@ -126,7 +129,7 @@ public:
 	{
 		this->m = m;
 		this->type = type;
-		head = 0;
+		head = 0; sz = 0;
 		hashTable = new node*[m];
 
 		for (int i = 0; i < m; i++)
@@ -144,7 +147,7 @@ public:
 		type == 1 ? h = djb2(s) % m : type == 2 ? h = jenkins(s) % m : h = fnv(s) % m;
 
 		struct node *newNode = new node(s, v); v++;
-		head = hashTable[h];
+		head = hashTable[h]; sz++;
 
 		//1st element
 		if (head == NULL)
@@ -169,6 +172,7 @@ public:
 		ull h;
 		type == 1 ? h = djb2(s) % m : type == 2 ? h = jenkins(s) % m : h = fnv(s) % m;
 
+		sz--;
 		struct node *temp = search(s);
 		struct node *pre, *nxt;
 
@@ -231,6 +235,28 @@ public:
 		return (m - cnt);
 	}
 
+	int getSize()
+	{
+		return sz;
+	}
+
+	void printTable()
+	{
+		for (ll i = 0; i < m; i++)
+		{
+			printf("%I64d: ",i);
+			head = hashTable[i];
+			while (head->next)
+			{
+				cout << head->key << " -> ";
+				head = head->next;
+			}
+
+			if (head)
+				cout << head->next;
+		}
+	}
+
 	void memFree()
 	{
 		for (ll i = 0; i < m; i++)
@@ -264,12 +290,12 @@ struct node2
 class linearProbing
 {
 	int m, c;
-	int type, v;
+	int type, v, sz;
 	node2 *hashTable;
 public:
 	linearProbing(int m, int type)
 	{
-		c = 0, v = 1;
+		c = 0, v = 1; sz = 0;
 		this->m = m;
 		this->type = type;
 		hashTable = new node2[m];
@@ -279,7 +305,9 @@ public:
 	{
 		//avoid duplicate
 		if (search(s))
+		{
 			return;
+		}
 
 		ull h;
 		int i = 0;
@@ -291,6 +319,7 @@ public:
 		if (hashTable[idx].value>0)
 			c++;
 
+		sz++;
 		while (i < m)
 		{
 			idx = (i + h) % m;
@@ -310,6 +339,7 @@ public:
 		int i = search(s);
 		if (i)
 		{
+			sz--; i--;
 			hashTable[i].key = "deleted"; hashTable[i].value = -1;
 		}
 
@@ -328,12 +358,12 @@ public:
 			ull idx = (h + i) % m;
 
 			//empty cell
-			if (hashTable[idx].key=="null")
+			if (hashTable[idx].key == "null")
 				return 0;
 
-			//key found
+			//key found, return index in one-indexing format
 			else if (hashTable[idx].key == s)
-				return idx;
+				return idx + 1;
 
 			else
 				i++;
@@ -349,7 +379,13 @@ public:
 
 	int getSize()
 	{
-		return v - 1;
+		return sz;
+	}
+
+	void printTable()
+	{
+		for (ll i = 0; i < m; i++)
+			cout << hashTable[i].key << " " << hashTable[i].value << endl;
 	}
 
 	void memFree()
