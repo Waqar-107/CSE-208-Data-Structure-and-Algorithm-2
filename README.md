@@ -10,3 +10,7 @@
 
 <h3>week-8: Max-Flow, Min-Cut</h3><p>a)Ford-Fulkerson Method</p>
 
+<h3>week-10: Hashing </h3><p>a)performance of linear probing and seperate-chaining</p>
+
+<h3>week-12: Red-Black Tree implementation</h3>
+
