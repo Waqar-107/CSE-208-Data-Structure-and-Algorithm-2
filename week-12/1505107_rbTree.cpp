@@ -48,13 +48,13 @@ struct node
 
 class rbTree
 {
-	node *root, *temp;
+	node *temp;
 	node *parent, *uncle, *grandParent;
 	node *t1, *t2, *t3, *t4, *gt;
 	node *a, *b, *c;
 
 public:
-
+	node *root;
 	rbTree()
 	{
 		root = NULL;
@@ -335,7 +335,7 @@ public:
 						*         p
 						*           \
 						*             t     */
-						t=leftRotate(t);
+						t = leftRotate(t);
 					}
 				}
 			}
@@ -423,14 +423,155 @@ public:
 	//-----------------------------------------------------------------------search a key in the tree
 
 
+	//-----------------------------------------------------------------------get sibling
+	node *sibling(node *x)
+	{
+		parent = x->parent;
+
+		if (parent != NULL)
+		{
+			if (parent->data > x->data)
+				return parent->right;
+			else
+				return parent->left;
+		}
+	}
+	//-----------------------------------------------------------------------get sibling
+
+
+	//-----------------------------------------------------------------------case: red
+	void caseRed(node *x)
+	{
+		parent = x->parent;
+		t1 = x->left; t2 = x->right;
+
+		//x is right child
+		if (x->data > parent->data)
+		{
+			if (x->left != NULL)
+				parent->right = x->left, x->left->parent = parent;
+
+			else if (x->right != NULL)
+				parent->right = x->right, x->right->parent = parent;
+
+			else
+				parent->right = NULL;
+		}
+
+		//x is left child
+		else
+		{
+			if (x->left != NULL)
+				parent->left = x->left, x->left->parent = parent;
+
+			else if (x->right != NULL)
+				parent->left = x->right, x->right->parent = parent;
+
+			else
+				parent->left = NULL;
+		}
+
+		delete x;
+	}
+	//-----------------------------------------------------------------------case: red
+
+
+	//-----------------------------------------------------------------------delete a node from the tree, recursively !!!
+	void deleteNode(node *x)
+	{
+		node *p;
+
+		if(x->left!=NULL && x->right!=NULL)
+		{
+			//delete the succesor
+			temp=getMin(x->right);
+			x->data = temp->data;
+
+			deleteNode(temp);
+		}
+
+		else
+		{
+			if (x->color == red)
+				caseRed(x);
+
+			else if (x->right != NULL && x->right->color == red && x->color == black)
+			{
+				//change color of x.right into black and stick it with x.parent, delete x
+				x->right->color = black;
+				parent = x->parent;
+
+				//root
+				if (parent == NULL)
+					root = x->right;
+
+				else
+				{
+					if (x->data < parent->data)
+						parent->left = x->right;
+
+					else
+						parent->right = x->right;
+				}
+
+				x->right->parent = parent;
+				delete x;
+			}
+
+			else if (x->left != NULL && x->left->color == red && x->color == black)
+			{
+				//change color of x.left into black and stick it with x.parent, delete x
+				x->left->color = black;
+				parent = x->parent;
+
+				//root
+				if (parent == NULL)
+					root = x->left;
+
+				else
+				{
+					if (x->data < parent->data)
+						parent->left = x->left;
+
+					else
+						parent->right = x->left;
+				}
+
+				x->left->parent = parent;
+				delete x;
+			}
+
+			//tryout the six cases
+			else
+			{
+
+			}
+		}
+	}
+	//-----------------------------------------------------------------------delete a node from the tree, recursively !!!
+
+
+	//-----------------------------------------------------------------------delete a key from the tree, call from the main
+	void deleteItem(int x)
+	{
+		node *rm = lookUp(x);
+
+		if (rm == NULL)
+			printf("item not found in the tree !!!\n");
+
+		else
+			deleteNode(rm);
+	}
+	//-----------------------------------------------------------------------delete a key from the tree, call from the main
+
+
 	//-----------------------------------------------------------------------minimum of the tree
-	node* getMin()
+	node* getMin(node *x)
 	{
 		if (root == NULL)
 			return NULL;
 
-		struct node *temp;
-		temp = root;
+		temp = x;
 
 		while (temp->left!= NULL)
 		{
@@ -443,13 +584,12 @@ public:
 
 
 	//-----------------------------------------------------------------------maximum of the tree
-	node* getMax()
+	node* getMax(node *x)
 	{
 		if (root == NULL)
 			return NULL;
 
-		struct node *temp;
-		temp = root;
+		temp = x;
 
 		while (temp->right != NULL)
 		{
@@ -468,6 +608,91 @@ public:
 		printf("\n");
 	}
 	//-----------------------------------------------------------------------traverse the tree and print in sorted order
+
+
+	//-----------------------------------------------------------------------using dfs to traverse the tree and checking its properties
+	void dfs(node *t,int cnt)
+	{
+		if (t->color == red)
+		{
+			if (t->right && t->right->color == red)
+				printf("red-red property violated !!!\n");
+
+			if (t->left && t->left->color == red)
+				printf("red-red property violated !!!\n");
+		}
+
+		if (t->left == NULL && t->right == NULL)
+		{
+			if (t->color == black)
+				cnt++;
+
+			printf("%d %d\n", t->data, cnt);
+			return;
+		}
+
+		if (t->right)
+		{
+			if (t->color == black)
+				dfs(t->right, cnt + 1);
+			else
+				dfs(t->right, cnt);
+		}
+
+		if (t->left)
+		{
+			if (t->color == black)
+				dfs(t->left, cnt + 1);
+			else
+				dfs(t->left, cnt);
+		}
+	}
+	//-----------------------------------------------------------------------using dfs to traverse the tree and checking its properties
+
+
+	//-----------------------------------------------------------------------verify red-black tree properties
+	void verify()
+	{
+		if(root)
+			dfs(root, 0);
+	}
+	//-----------------------------------------------------------------------verify red-black tree properties
+
+
+	//-----------------------------------------------------------------------height of the tree
+	int height(node *x)
+	{
+		if (x == NULL)
+			return -1;
+
+		return max(height(x->left) +1, height(x->right)+1);
+	}
+
+	int getHeight()
+	{
+		return height(root);
+	}
+	//-----------------------------------------------------------------------height of the tree
+
+
+	//-----------------------------------------------------------------------visualize the tree
+	void visualize(struct node * x, int h)
+	{
+		if (x == 0)
+			return;
+
+		//print left sub-tree
+		visualize(x->left, h - 1);
+
+		//print item
+		for (int i = 0; i<h; i++)printf("   ");
+		printf("%03d\n", x->data);
+
+		//print right sub-tree
+		visualize(x->right, h - 1);
+	}
+	//-----------------------------------------------------------------------visualize the tree
+
 };
 
 int main()
@@ -481,7 +706,8 @@ int main()
 
 	while (1)
 	{
-		printf("1. insert  2. delete  3.look-up  4. minimum  5. maximum  6. print  7.exit\n");
+		printf("1. insert  2. delete  3.look-up  4. minimum  5. maximum  6. print  7. verification \n");
+		printf("8. height of the tree  9. visualize tree  10. exit\n");
 		scanf("%d", &t);
 
 		if (t == 1)
@@ -493,14 +719,14 @@ int main()
 		else if (t == 2)
 		{
 			scanf("%d", &n);
-			//del
+			x.deleteItem(n);
 		}
 
 		else if (t == 3)
 		{
 			scanf("%d", &n);
 
-			if (x.lookUp(n)==NULL)
+			if (x.lookUp(n) == NULL)
 				printf("%d is not found in the tree :(\n", n);
 			else
 				printf("found !!!\n");
@@ -508,23 +734,32 @@ int main()
 
 		else if (t == 4)
 		{
-			if (x.getMin()==NULL)
+			if (x.getMin(x.root) == NULL)
 				printf("the tree is empty !!!\n");
 			else
-				printf("%d is the minimum\n", x.getMin()->data);
+				printf("%d is the minimum\n", x.getMin(x.root)->data);
 		}
 
 		else if (t == 5)
 		{
 
-			if (x.getMax()==NULL)
+			if (x.getMax(x.root) == NULL)
 				printf("the tree is empty !!!\n");
 			else
-				printf("%d is the maximum\n", x.getMax()->data);
+				printf("%d is the maximum\n", x.getMax(x.root)->data);
 		}
 
 		else if (t == 6)
 			x.print();
+
+		else if (t == 7)
+			x.verify();
+
+		else if (t == 8)
+			printf("height of the tree is %d\n", x.getHeight());
+
+		else if(t==9)
+			x.visualize(x.root,x.getHeight());
 
 		else
 			break;
