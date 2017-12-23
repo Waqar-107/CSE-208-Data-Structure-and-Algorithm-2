@@ -67,49 +67,35 @@ public:
 			return;
 
 		inOrderTraversal(t->left);
-		printf("%d ", t->data);
+		printf("%d %d\n", t->data,t->color);
 		inOrderTraversal(t->right);
 	}
 	//-----------------------------------------------------------------------inorder traversal
 
 
 	//-----------------------------------------------------------------------right rotation
-	node* rightRotate(node *t)
+	node *rightRotate(node *t)
 	{
-		c = t;
-		b = t->parent;
-		a = b->parent;
+		b = t;
+		a = b->parent; gt = a->parent;
+		c = b->left; t3 = b->right;
 
 		swap(a->color, b->color);
 
-		t1 = c->left; t2 = c->right;
-		t3 = b->right; t4 = a->right;
-		gt = a->parent;
-
+		b->parent = gt;
 		//a is the right child
 		if (gt != NULL &&  a->data > gt->data)
 			gt->right = b;
 
-		else if(gt != NULL &&  a->data < gt->data)
+		//a is the left child
+		else if (gt != NULL &&  a->data < gt->data)
 			gt->left = b;
 
-		b->parent = gt;
-		b->left = c; b->right = a;
-		c->parent = a->parent = b;
-		c->left = t1; c->right = t2;
-		a->left = t3; a->right = t4;
-
-		if (t1 != NULL)
-			t1->parent = c;
-
-		if (t2 != NULL)
-			t2->parent = c;
+		a->left = t3;
+		b->right = a; a->parent=b;
 
 		if (t3 != NULL)
 			t3->parent = a;
-
-		if (t4 != NULL)
-			t4->parent = a;
 
 		return b;
 	}
@@ -117,132 +103,32 @@ public:
 
 
 	//-----------------------------------------------------------------------left rotation
-	node* leftRotate(node *t)
+	node *leftRotate(node *t)
 	{
-		c = t;
-		b = t->parent;
-		a = b->parent;
+		b = t;
+		a = b->parent; gt = a->parent;
+		c = b->right; t2 = b->left;
 
 		swap(a->color, b->color);
 
-		t1 = a->left; t2 = b->left;
-		t3 = c->left; t4 = c->right;
-		gt = a->parent;
-
+		b->parent = gt;
 		//a is the right child
-		if (gt!=NULL && a->data > gt->data)
+		if (gt != NULL &&  a->data > gt->data)
 			gt->right = b;
 
-		else if (gt != NULL && a->data < gt->data)
+		//a is the left child
+		else if (gt != NULL &&  a->data < gt->data)
 			gt->left = b;
 
-		b->parent = gt;
-		b->left = a; b->right = c;
-		c->parent = a->parent = b;
-		a->left = t1; a->right = t2;
-		c->left = t3; c->right = t4;
-
-		if (t1 != NULL)
-			t1->parent = a;
+		a->right = t2;
+		b->left = a; a->parent = b;
 
 		if (t2 != NULL)
 			t2->parent = a;
-
-		if (t3 != NULL)
-			t3->parent = c;
-
-		if (t4 != NULL)
-			t4->parent = c;
 
 		return b;
 	}
 	//-----------------------------------------------------------------------left rotation
-
-
-	//-----------------------------------------------------------------------right-left rotation
-	node* rightLeftRotate(node *t)
-	{
-		c = t;
-		b = c->parent;
-		a = b->parent;
-
-		swap(a->color, c->color);
-
-		t1 = a->left; t2 = c->left;
-		t3 = c->right; t4 = b->right;
-		gt = a->parent;
-
-		//a is the right child
-		if (gt!=NULL && a->data > gt->data)
-			gt->right = c;
-
-		else if (gt != NULL && a->data < gt->data)
-			gt->left = c;
-
-		c->parent = gt;
-		c->left = a; c->right = b;
-		a->parent = b->parent = c;
-		a->left = t1; a->right = t2;
-		b->left = t3; b->right = t4;
-
-		if (t1 != NULL)
-			t1->parent = a;
-
-		if (t2 != NULL)
-			t2->parent = a;
-
-		if (t3 != NULL)
-			t3->parent = b;
-
-		if (t4 != NULL)
-			t4->parent = b;
-
-		return c;
-	}
-	//-----------------------------------------------------------------------right-left rotation
-
-
-	//-----------------------------------------------------------------------left-right rotation
-	node* leftRightRotate(node *t)
-	{
-		c = t;
-		b = c->parent;
-		a = b->parent;
-
-		swap(a->color, c->color);
-
-		t1 = b->left; t2 = c->left;
-		t3 = c->right; t4 = a->right;
-		gt = a->parent;
-
-		//a is the right child
-		if (gt!=NULL && a->data > gt->data)
-			gt->right = c;
-
-		else if (gt != NULL && a->data < gt->data)
-			gt->left = c;
-
-		c->parent = gt;
-		c->left = b; c->right = a;
-		b->parent = a->parent = c;
-		b->left = t1; b->right = t2;
-		a->left = t3; a->right = t4;
-
-		if (t1 != NULL)
-			t1->parent = b;
-
-		if (t2 != NULL)
-			t2->parent = b;
-
-		if (t3 != NULL)
-			t3->parent = a;
-
-		if (t4 != NULL)
-			t4->parent = a;
-
-		return c;
-	}
-	//-----------------------------------------------------------------------left-right rotation
 
 
 	//-----------------------------------------------------------------------fix the properties of the tree
@@ -285,7 +171,9 @@ public:
 						*  p
 						*   \
 						*    t           */
-						t = leftRightRotate(t);
+
+						t = leftRotate(t);
+						t = rightRotate(t);
 					}
 
 					else
@@ -295,7 +183,8 @@ public:
 						*     p
 						*   /
 						*  t	                   */
-						t=rightRotate(t);
+
+						t = rightRotate(t->parent);
 					}
 				}
 			}
@@ -325,7 +214,9 @@ public:
 						*         p
 						*       /
 						*     t          */
-						t = rightLeftRotate(t);
+
+						t = rightRotate(t);
+						t = leftRotate(t);
 					}
 
 					else
@@ -335,7 +226,8 @@ public:
 						*         p
 						*           \
 						*             t     */
-						t = leftRotate(t);
+
+						t = leftRotate(t->parent);
 					}
 				}
 			}
@@ -354,11 +246,11 @@ public:
 	//-----------------------------------------------------------------------insert in the tree
 	void insert(int data)
 	{
-		if (lookUp(data))
+		/*if (lookUp(data))
 		{
 			printf("%d already exists in the tree !!!\n", data);
 			return;
-		}
+		}*/
 
 		struct node *newNode = new node(data);
 		if (root == NULL)
@@ -369,7 +261,7 @@ public:
 			temp = root;
 			while (temp)
 			{
-				if (data > temp->data && temp->right == NULL)
+				if (data >= temp->data && temp->right == NULL)
 				{
 					newNode->parent = temp;
 					temp->right = newNode;
@@ -383,7 +275,7 @@ public:
 					break;
 				}
 
-				else if (data > temp->data && temp->right)
+				else if (data >= temp->data && temp->right)
 					temp = temp->right;
 
 				else if (data < temp->data && temp->left)
@@ -430,7 +322,7 @@ public:
 
 		if (parent != NULL)
 		{
-			if (parent->data > x->data)
+			if (parent->left==x)
 				return parent->right;
 			else
 				return parent->left;
@@ -446,7 +338,7 @@ public:
 		t1 = x->left; t2 = x->right;
 
 		//x is right child
-		if (x->data > parent->data)
+		if (x==x->parent->right)
 		{
 			if (x->left != NULL)
 				parent->right = x->left, x->left->parent = parent;
@@ -476,6 +368,133 @@ public:
 	//-----------------------------------------------------------------------case: red
 
 
+	//-----------------------------------------------------------------------delete case: 1
+	void deleteCase1(node *x)
+	{
+		if (x->parent == NULL)
+			x->color = black;
+		else
+			deleteCase2(x);
+	}
+	//-----------------------------------------------------------------------delete case: 1
+
+
+	//-----------------------------------------------------------------------delete case: 2
+	void deleteCase2(node *x)
+	{
+		t1 = sibling(x);
+
+		if (t1 != NULL && t1->color == red)
+		{
+			x->parent->color = red;
+			t1->color = black;
+
+			if (x == x->parent->left)
+				leftRotate(t1);
+			else
+				rightRotate(t1);
+		}
+
+		deleteCase3(x);
+	}
+	//-----------------------------------------------------------------------delete case: 2
+
+
+	//-----------------------------------------------------------------------delete case: 3
+	void deleteCase3(node *x)
+	{
+		t3 = sibling(x);
+
+		bool f1=0, f2=0;
+		if (t3->left == NULL)
+			f1 = 1;
+		else if (t3->left != NULL && t3->left->color == black)
+			f1 = 1;
+
+		if (t3->right == NULL)
+			f2 = 1;
+		else if (t3->right != NULL && t3->right->color == black)
+			f2 = 1;
+
+		if (x->parent->color == black && t3->color == black && f1 && f2)
+		{
+			t3->color = red;
+			deleteCase1(x->parent);
+		}
+
+		else
+			deleteCase4(x);
+	}
+	//-----------------------------------------------------------------------delete case: 3
+
+
+	//-----------------------------------------------------------------------delete case: 4
+	void deleteCase4(node *x)
+	{
+		t3 = sibling(x);
+
+		bool f1 = 0, f2 = 0;
+		if (t3->left == NULL)
+			f1 = 1;
+		else if (t3->left != NULL && t3->left->color == black)
+			f1 = 1;
+
+		if (t3->right == NULL)
+			f2 = 1;
+		else if (t3->right != NULL && t3->right->color == black)
+			f2 = 1;
+
+		if (x->parent->color == red && t3->color == black && f1 && f2)
+		{
+			t3->color = red;
+			x->parent->color = black;
+		}
+
+		else
+			deleteCase5(x);
+	}
+	//-----------------------------------------------------------------------delete case: 4
+
+
+	//-----------------------------------------------------------------------delete case: 5
+	void deleteCase5(node *x)
+	{
+		t3 = sibling(x);
+
+		if (x == x->parent->left && t3->color == black && t3->left->color == red && (t3->right == NULL || (t3->right != NULL && t3->right->color == black)))
+			rightRotate(t3->left);
+
+		else if (x == x->parent->right && t3->color == black && t3->right->color == red && (t3->left == NULL || (t3->left != NULL && t3->left->color == black)))
+			leftRotate(t3->right);
+
+		deleteCase6(x);
+	}
+	//-----------------------------------------------------------------------delete case: 5
+
+
+	//-----------------------------------------------------------------------delete case: 6
+	void deleteCase6(node *x)
+	{
+		t3 = sibling(x);
+
+		t3->color = x->parent->color;
+		x->parent->color = black;
+
+		if (x == x->parent->left)
+		{
+			if (t3->right != NULL && t3->right->color == red)
+				t3->right->color = black, leftRotate(t3);
+		}
+
+		else
+		{
+			if (t3->left != NULL && t3->left->color == red)
+				t3->left->color = black, rightRotate(t3);
+		}
+	}
+	//-----------------------------------------------------------------------delete case: 6
+
+
 	//-----------------------------------------------------------------------delete a node from the tree, recursively !!!
 	void deleteNode(node *x)
 	{
@@ -484,7 +503,7 @@ public:
 		if(x->left!=NULL && x->right!=NULL)
 		{
 			//delete the succesor
-			temp=getMin(x->right);
+			temp=getMax(x->left);
 			x->data = temp->data;
 
 			deleteNode(temp);
@@ -507,7 +526,7 @@ public:
 
 				else
 				{
-					if (x->data < parent->data)
+					if (x==x->parent->left)
 						parent->left = x->right;
 
 					else
@@ -544,7 +563,45 @@ public:
 			//tryout the six cases
 			else
 			{
+				deleteCase1(x);
 
+				/*visualize(root, getHeight());
+				cout << "the height is " << getHeight(); nl
+					print();*/
+
+				//replace with child;
+				if (x->right != NULL)
+				{
+					t3 = x->right;
+					t3->color = x->color;
+					t3->parent = x->parent;
+
+					if (x->parent && x == x->parent->right)
+						x->parent->right = t3;
+					else if (x->parent && x == x->parent->left)
+						x->parent->left = t3;
+				}
+
+				else if (x->left != NULL)
+				{
+					t3 = x->left; t3->color = x->color;
+					t3->parent = x->parent;
+
+					if (x->parent && x == x->parent->right)
+						x->parent->right = t3;
+					else if (x->parent && x == x->parent->left)
+						x->parent->left = t3;
+				}
+
+				else
+				{
+					if (x->parent && x == x->parent->right)
+						x->parent->right = NULL;
+					else if (x->parent && x == x->parent->left)
+						x->parent->left = NULL;
+				}
+
+				delete x;
 			}
 		}
 	}
@@ -663,7 +720,7 @@ public:
 	int height(node *x)
 	{
 		if (x == NULL)
-			return -1;
+			return 0;
 
 		return max(height(x->left) +1, height(x->right)+1);
 	}
@@ -678,7 +735,7 @@ public:
 	//-----------------------------------------------------------------------visualize the tree
 	void visualize(struct node * x, int h)
 	{
-		if (x == 0)
+		if (x == NULL)
 			return;
 
 		//print left sub-tree
@@ -706,8 +763,10 @@ int main()
 
 	while (1)
 	{
+		printf("---------------------------------------------------------------------------------------\n");
 		printf("1. insert  2. delete  3.look-up  4. minimum  5. maximum  6. print  7. verification \n");
 		printf("8. height of the tree  9. visualize tree  10. exit\n");
+		printf("---------------------------------------------------------------------------------------\n");
 		scanf("%d", &t);
 
 		if (t == 1)
@@ -727,7 +786,7 @@ int main()
 			scanf("%d", &n);
 
 			if (x.lookUp(n) == NULL)
-				printf("%d is not found in the tree :(\n", n);
+				printf("%d is not in the tree :(\n", n);
 			else
 				printf("found !!!\n");
 		}
