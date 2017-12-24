@@ -67,7 +67,7 @@ public:
 			return;
 
 		inOrderTraversal(t->left);
-		printf("%d %d\n", t->data,t->color);
+		printf("%d ", t->data);
 		inOrderTraversal(t->right);
 	}
 	//-----------------------------------------------------------------------inorder traversal
@@ -378,7 +378,6 @@ public:
 	//-----------------------------------------------------------------------delete case: 1
 	void deleteCase1(node *x)
 	{
-		cout << x->data << " in 1"; nl
 		if (x->parent == NULL)
 			x->color = black;
 		else
@@ -390,13 +389,10 @@ public:
 	//-----------------------------------------------------------------------delete case: 2
 	void deleteCase2(node *x)
 	{
-		t1 = sibling(x); cout << t1->data<<" in 2";nl
+		t1 = sibling(x);
 
 		if (t1 != NULL && t1->color == red)
 		{
-			//x->parent->color = red;
-			//t1->color = black;
-
 			if (x == x->parent->left)
 				leftRotate(t1);
 			else
@@ -426,8 +422,8 @@ public:
 
 		if (x->parent->color == black && t3->color == black && f1 && f2)
 		{
-			t3->color = red; cout << "sending to 1 from 3\n"<<x->parent->data<<" is sent";
-			deleteCase1(x->parent); cout << t1->data << " in 3"; nl
+			t3->color = red;
+			deleteCase1(x->parent);
 		}
 
 		else
@@ -455,7 +451,7 @@ public:
 		if (x->parent->color == red && t3->color == black && f1 && f2)
 		{
 			t3->color = red;
-			x->parent->color = black; cout << t1->data << " in 4"; nl
+			x->parent->color = black;
 		}
 
 		else
@@ -467,9 +463,8 @@ public:
 	//-----------------------------------------------------------------------delete case: 5
 	void deleteCase5(node *x)
 	{
-		t3 = sibling(x); cout <<x->data<<" "<< t1->data << " in 5\n";
+		t3 = sibling(x);
 
-		//cout<<x->parent->color<<" "<<t3->color<<" "<<
 		if (x == x->parent->left && x->parent->color == black && t3->color == black && (t3->left!=NULL && t3->left->color == red))
 		{
 			bool f1 = 0;
@@ -477,7 +472,6 @@ public:
 				f1 = 1;
 			else if (t3->right != NULL && t3->right->color == black)
 				f1 = 1;
-
 
 			if (f1)
 				rightRotate(t3->left);
@@ -495,7 +489,6 @@ public:
 				leftRotate(t3->right);
 		}
 
-		dbg
 		deleteCase6(x);
 	}
 	//-----------------------------------------------------------------------delete case: 5
@@ -504,7 +497,7 @@ public:
 	//-----------------------------------------------------------------------delete case: 6
 	void deleteCase6(node *x)
 	{
-		t3 = sibling(x); cout << t1->data << " in 6"; nl
+		t3 = sibling(x);
 
 			if (x == x->parent->left && t3->color == black && t3->right->color == red)
 				t3->right->color = black, leftRotate(t3), visualize(root, getHeight());
@@ -587,10 +580,6 @@ public:
 			{
 				deleteCase1(x);
 
-				/*visualize(root, getHeight());
-				cout << "the height is " << getHeight(); nl
-					print();*/
-
 				//replace with child;
 				if (x->right != NULL)
 				{
@@ -622,6 +611,9 @@ public:
 					else if (x->parent && x == x->parent->left)
 						x->parent->left = NULL;
 				}
+
+				if (root == x)
+					root = NULL;
 
 				delete x;
 			}
