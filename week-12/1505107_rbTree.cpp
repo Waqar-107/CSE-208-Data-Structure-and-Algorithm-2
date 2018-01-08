@@ -420,9 +420,17 @@ public:
 		else if (t3->right != NULL && t3->right->color == black)
 			f2 = 1;
 
-		if (x->parent->color == black && t3->color == black && f1 && f2)
+		bool f3=0;
+		if (t3 == NULL)
+			f3 = 1;
+		else if (t3 != NULL && t3->color == black)
+			f3 = 1;
+
+		if (x->parent->color == black && f3 && f1 && f2)
 		{
-			t3->color = red;
+			if(t3)
+				t3->color = red;
+
 			deleteCase1(x->parent);
 		}
 
@@ -448,9 +456,17 @@ public:
 		else if (t3->right != NULL && t3->right->color == black)
 			f2 = 1;
 
-		if (x->parent->color == red && t3->color == black && f1 && f2)
+		bool f3 = 0;
+		if (t3 == NULL)
+			f3 = 1;
+		else if (t3 != NULL && t3->color == black)
+			f3 = 1;
+
+		if (x->parent->color == red && f3 && f1 && f2)
 		{
-			t3->color = red;
+			if(t3)
+				t3->color = red;
+
 			x->parent->color = black;
 		}
 
@@ -499,11 +515,18 @@ public:
 	{
 		t3 = sibling(x);
 
-			if (x == x->parent->left && t3->color == black && t3->right->color == red)
-				t3->right->color = black, leftRotate(t3), visualize(root, getHeight());
+		if (x == x->parent->left)
+		{
+			if (t3 != NULL && t3->right != NULL && t3->right->color == red)
+				t3->right->color = black, leftRotate(t3);
 
-		else if(x==x->parent->right && t3->color==black && t3->left->color==red)
-			t3->left->color = black, rightRotate(t3);
+		}
+
+		else
+		{
+			if (t3 != NULL && t3->left != NULL && t3->left->color == red)
+				t3->left->color = black, rightRotate(t3);
+		}
 
 		x->color = black;
 	}
