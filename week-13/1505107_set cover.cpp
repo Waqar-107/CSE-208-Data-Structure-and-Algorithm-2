@@ -2,6 +2,14 @@
 
 /***from dust i have come, dust i will be***/
 
+/*
+* if in any node the lower bound is lb and 'c' is the best answer found so far then
+* if c<=lb then no need to go further or prune the branch
+* else there might a solution in this path, so search further
+*
+* update 'c' when you cover the whole U
+*/
+
 #include<algorithm>
 #include<cmath>
 #include<cstdio>
@@ -14,35 +22,103 @@
 #include<numeric>
 #include<queue>
 #include<set>
-#include<sstream>
 #include<stack>
+#include<sstream>
 #include<string>
 #include<time.h>
 #include<utility>
 #include<vector>
 
+typedef long long int ll;
+typedef unsigned long long int ull;
+
 #define dbg printf("in\n");
 #define nl printf("\n");
-#define N 1010
-#define inf 100000000000
+#define N 100
+#define inf 100000
 
 using namespace std;
+
+string sans;
+int n, m, ans, sz;
+vector<int> subSet[N];
+
+void setCover(string s,int l)
+{
+	//calculate lower_bound
+	int picked = 0, cnt=0;
+	int mxCardinality = 0;
+	set<int> coveredSoFar;
+
+	for (int i = 0; i < m; i++)
+	{
+		if (s[i] == '1')
+		{
+			picked++;
+
+			for (int j = 0; j < subSet[i].size(); j++)
+				coveredSoFar.insert(subSet[i][j]);
+		}
+
+		else
+		{
+			sz = subSet[i].size();
+			mxCardinality = max(mxCardinality, sz);
+		}
+	}
+
+	int lb=inf;
+	if(mxCardinality)
+		 lb = picked + (n - coveredSoFar.size()) / mxCardinality;
+
+	//all done in this path
+	if (coveredSoFar.size() == n)
+	{
+		cnt = 0;
+		for (int i = 0; i < m; i++)
+		{
+			if (s[i] == '1')
+				cnt++;
+		}
+		//cout << cnt << " " << l << " " << s << " " << ans<<" bahir"; nl;
+		if (ans > cnt)
+		{
+			//cout << cnt << " " << l << " " << s << " " << ans << " vitor"; nl;
+			ans = cnt;
+			sans = s;
+			return;
+		}
+	}
+
+	if (lb >= ans)
+		return;
+
+	//two branches
+	//we either take subset l else not
+	string a, b;
+
+	a = s;
+	b = s; b[l] = '1';
+
+	if (l < m)
+	{
+		//cout << s << " " << a << " " << b<<" "<<l<<" "<<cnt;
+		//nl
+		setCover(a, l + 1);
+		setCover(b, l + 1);
+	}
+
+}
 
 int main()
 {
 	//freopen("in2.txt", "r", stdin);
 
 	int i, j, k;
-	int n, m, x;
+	int x, y;
 	string s;
 
 	scanf("%d%d", &n, &m);
-
-	vector<int> *v = new vector<int>[m];
-	bool *taken = new bool[m];
-	bool *notInFinal = new bool[n + 1];
-	int *unCov = new int[m];
-
 	for (i = 0; i <= m; i++)
 	{
 		getline(cin, s);
@@ -50,51 +126,36 @@ int main()
 
 		while (str >> x)
 		{
-			v[i - 1].push_back(x);
+			subSet[i - 1].push_back(x);
 		}
 	}
 
+	ans = m;
+
+	s = "";
 	for (i = 0; i < m; i++)
-		taken[i] = false;
+		s += '0';
 
-	for (i = 0; i <= n; i++)
-		notInFinal[i] = false;
+	sans = s;
+	setCover(s, 0);
 
-	vector<int> ans;
-
-	while (n)
+	k = 0;
+	for (i = 0; i < m; i++)
 	{
-		x = 0; k = -1;
-		for (i = 0; i < m; i++)
-		{
-			if (!taken[i])
-			{
-				unCov[i] = 0;
-				for (j = 0; j < v[i].size(); j++)
-				{
-					if (!notInFinal[v[i][j]])
-						unCov[i]++;
-				}
-
-				if (x < unCov[i])
-					x = unCov[i], k = i;
-			}
-		}
-
-		taken[k] = true; ans.push_back(k);
-		n -= x;
-
-		for (i = 0; i < v[k].size(); i++)
-			notInFinal[v[k][i]] = true;
+		if (sans[i] == '1')
+			k++;
 	}
 
-	printf("%d\n", ans.size());
-	for (i = 0; i < ans.size(); i++)
+	cout << k << endl;
+	for (i = 0; i < m; i++)
 	{
-		for (j = 0; j < v[ans[i]].size(); j++)
-			printf("%d ", v[ans[i]][j]);
+		if (sans[i] == '1')
+		{
+			for (j = 0; j < subSet[i].size(); j++)
+				cout << subSet[i][j] << " ";
 
-		printf("\n");
+			cout << endl;
+		}
 	}
 
 	return 0;
