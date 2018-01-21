@@ -68,8 +68,11 @@ void setCover(string s,int l)
 	}
 
 	int lb=inf;
-	if(mxCardinality)
-		 lb = picked + (n - coveredSoFar.size()) / mxCardinality;
+	if (mxCardinality)
+	{
+		float t = (float)(n - coveredSoFar.size())/mxCardinality;
+		lb = picked + ceil(t);
+	}
 
 	//all done in this path
 	if (coveredSoFar.size() == n)
@@ -80,10 +83,9 @@ void setCover(string s,int l)
 			if (s[i] == '1')
 				cnt++;
 		}
-		//cout << cnt << " " << l << " " << s << " " << ans<<" bahir"; nl;
+
 		if (ans > cnt)
 		{
-			//cout << cnt << " " << l << " " << s << " " << ans << " vitor"; nl;
 			ans = cnt;
 			sans = s;
 			return;
@@ -102,8 +104,6 @@ void setCover(string s,int l)
 
 	if (l < m)
 	{
-		//cout << s << " " << a << " " << b<<" "<<l<<" "<<cnt;
-		//nl
 		setCover(a, l + 1);
 		setCover(b, l + 1);
 	}
